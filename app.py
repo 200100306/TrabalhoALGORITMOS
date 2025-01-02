@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify # type: ignore
+from flask import Flask, render_template, request, jsonify  # type: ignore
 
 app = Flask(__name__)
 
@@ -44,28 +44,21 @@ class LinkedList:
             return True
         return False
 
+    def pop(self):
+        if not self.head:
+            return None
+        data = self.head.data
+        self.head = self.head.next
+        self.size -= 1
+        return data
+
     def display(self):
         current = self.head
         students = []
         while current:
-            students.append(current.data)
+            students.append(current.data)  # Mantém todos os dados completos
             current = current.next
         return students
-
-class Queue:
-    def __init__(self):
-        self.items = []
-
-    def enqueue(self, item):
-        self.items.append(item)
-
-    def dequeue(self):
-        if self.items:
-            return self.items.pop(0)
-        return None
-
-    def display(self):
-        return self.items
 
 class HashTable:
     def __init__(self):
@@ -78,17 +71,17 @@ class HashTable:
         if key in self.table:
             del self.table[key]
 
-    def update(self, key, field, value):
-        if key in self.table:
-            self.table[key][field] = value
-
     def display(self):
         return self.table
 
 # Inicializando estruturas
-turma = LinkedList(max_size=3)
-fila_espera = Queue()
+turmas = {}  # Dicionário para armazenar turmas por letra
+fila_espera = LinkedList(max_size=50)
 informacoes_alunos = HashTable()
+
+# Configuração inicial: primeira turma é "A"
+turma_atual = "A"
+turmas[turma_atual] = LinkedList(max_size=3)
 
 @app.route("/")
 def index():
@@ -98,29 +91,51 @@ def index():
 def add_student():
     data = request.json
     name = data.get("name")
-    turma_name = data.get("turma")
     grade = data.get("grade")
-    if turma.add(name):
-        informacoes_alunos.add(name, {"notas": [grade], "status": "matriculado", "turma": turma_name})
-        return jsonify({"message": "Aluno matriculado!", "students": turma.display()}), 200
-    else:
-        fila_espera.enqueue(name)
-        return jsonify({"message": "Turma cheia, aluno adicionado à fila de espera!", "queue": fila_espera.display()}), 200
+    turma_letra = data.get("turma")
+
+    # Validar nota
+    if not (0 <= int(grade) <= 20):
+        return jsonify({"message": "Erro: A nota deve estar entre 0 e 20."}), 400
+    
+    # Verificar se a turma já existe
+    if turma_letra not in turmas:
+        # Criar nova turma se não existir
+        turmas[turma_letra] = LinkedList(max_size=3)
+
+    # Tentar adicionar o aluno na turma
+    if turmas[turma_letra].add(name):
+        informacoes_alunos.add(name, {"notas": [grade], "turma": turma_letra})
+        return jsonify({"message": f"Aluno adicionado à turma {turma_letra}!", "students": turmas[turma_letra].display()}), 200
+
+    # Se a turma estiver cheia, adicionar o aluno à fila de espera
+    fila_espera.add({"name": name, "turma": turma_letra, "grade": grade})
+    return jsonify({"message": "Turma cheia. Aluno adicionado à fila de espera!", "queue": fila_espera.display()}), 200
 
 @app.route("/remove_student", methods=["POST"])
 def remove_student():
     name = request.json.get("name")
-    if turma.remove(name):
-        informacoes_alunos.remove(name)
-        return jsonify({"message": f"Aluno {name} removido da turma!", "students": turma.display()}), 200
-    return jsonify({"message": "Aluno não encontrado na turma!"}), 404
+    for letra, turma in turmas.items():
+        if turma.remove(name):
+            informacoes_alunos.remove(name)
+            # Verificar se há alunos na fila de espera
+            if fila_espera.size > 0:
+                next_in_line = fila_espera.pop()
+                turma.add(next_in_line)
+                aluno_info = informacoes_alunos.table[next_in_line["name"]]
+                aluno_info["turma"] = letra
+            return jsonify({"message": f"Aluno {name} removido com sucesso!", "students": turma.display(), "queue": fila_espera.display()}), 200
+    return jsonify({"message": "Aluno não encontrado!"}), 404
 
 @app.route("/data", methods=["GET"])
 def get_data():
+    all_students = {}
+    for letra, turma in turmas.items():
+        all_students[letra] = turma.display()
     return jsonify({
-        "students": turma.display(),
-        "queue": fila_espera.display(),
-        "info": informacoes_alunos.display()
+        "students": all_students,
+        "queue": fila_espera.display(),  # Exibe os dados completos do aluno na fila de espera
+        "info": informacoes_alunos.display(),
     })
 
 if __name__ == "__main__":

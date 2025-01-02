@@ -7,28 +7,49 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Gestão de Alunos</h1>
-    <form id="addStudentForm">
-        <label for="name">Nome do Aluno:</label>
-        <input type="text" id="name" name="name" required>
-        <label for="turma">Turma:</label>
-        <input type="text" id="turma" name="turma" required>
-        <label for="grade">Nota:</label>
-        <input type="number" id="grade" name="grade" required>
-        <button type="submit">Adicionar</button>
-    </form>
+    <div class="main-container">
+        <!-- Seção Esquerda -->
+        <div class="left-section">
+            <h1>Gestão de Alunos</h1>
+            <button id="refreshButton" style="margin-bottom: 20px;">Atualizar Página</button>
+            
+            <div class="container">
+                <div class="form-container">
+                    <h2>Adicionar Aluno</h2>
+                    <form id="addStudentForm">
+                        <label for="name">Nome do Aluno:</label>
+                        <input type="text" id="name" name="name" required>
+                        <label for="turma">Turma:</label>
+                        <input type="text" id="turma" name="turma" required>
+                        <label for="grade">Nota (0-20):</label>
+                        <input type="number" id="grade" name="grade" min="0" max="20" required>
+                        <button type="submit">Adicionar</button>
+                    </form>
+                </div>
 
-    <form id="removeStudentForm">
-        <label for="removeName">Nome do Aluno:</label>
-        <input type="text" id="removeName" name="removeName" required>
-        <button type="submit">Remover</button>
-    </form>
+                <div class="form-container">
+                    <h2>Remover Aluno</h2>
+                    <form id="removeStudentForm">
+                        <label for="removeName">Nome do Aluno:</label>
+                        <input type="text" id="removeName" name="removeName" required>
+                        <button type="submit">Remover</button>
+                    </form>
+                </div>
+            </div>
+        </div>
 
-    <h2>Alunos Matriculados:</h2>
-    <ul id="studentsList"></ul>
+        <!-- Container do Meio -->
+        <div class="mid-container">
+            <h2>Alunos Matriculados:</h2>
+            <div id="studentsList"></div>
+        </div>
 
-    <h2>Fila de Espera:</h2>
-    <ul id="queueList"></ul>
+        <!-- Container Direito -->
+        <div class="right-container">
+            <h2>Fila de Espera:</h2>
+            <ul id="queueList"></ul>
+        </div>
+    </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -36,31 +57,43 @@
             const removeStudentForm = document.getElementById("removeStudentForm");
             const studentsList = document.getElementById("studentsList");
             const queueList = document.getElementById("queueList");
+            const refreshButton = document.getElementById("refreshButton");
 
-            // Atualizar interface
             const updateUI = () => {
                 fetch("/data")
                     .then(response => response.json())
                     .then(data => {
-                        // Atualizar lista de alunos matriculados
                         studentsList.innerHTML = "";
-                        data.students.forEach(student => {
-                            const li = document.createElement("li");
-                            li.textContent = `${student.name} - Turma: ${student.turma}, Nota: ${student.grade}`;
-                            studentsList.appendChild(li);
-                        });
-
-                        // Atualizar fila de espera
                         queueList.innerHTML = "";
+
+                        for (const [turma, alunos] of Object.entries(data.students)) {
+                            const turmaHeader = document.createElement("h3");
+                            turmaHeader.textContent = `Turma ${turma}`;
+                            studentsList.appendChild(turmaHeader);
+
+                            const turmaList = document.createElement("ul");
+                            alunos.forEach(aluno => {
+                                const li = document.createElement("li");
+                                const studentInfo = data.info[aluno];
+                                if (studentInfo) {
+                                    li.textContent = `${aluno} - Nota: ${studentInfo.notas.join(", ")}`;
+                                } else {
+                                    li.textContent = `${aluno} - Sem informação disponível`;
+                                }
+                                turmaList.appendChild(li);
+                            });
+                            studentsList.appendChild(turmaList);
+                        }
+
                         data.queue.forEach(student => {
                             const li = document.createElement("li");
                             li.textContent = `${student.name} - Turma: ${student.turma}, Nota: ${student.grade}`;
                             queueList.appendChild(li);
                         });
-                    });
+                    })
+                    .catch(err => alert("Erro ao carregar dados: " + err.message));
             };
 
-            // Adicionar aluno
             addStudentForm.addEventListener("submit", (e) => {
                 e.preventDefault();
                 const name = document.getElementById("name").value;
@@ -76,12 +109,11 @@
                     .then(data => {
                         alert(data.message);
                         updateUI();
-                        // Limpar campos do formulário
                         addStudentForm.reset();
-                    });
+                    })
+                    .catch(err => alert("Erro: " + err.message));
             });
 
-            // Remover aluno
             removeStudentForm.addEventListener("submit", (e) => {
                 e.preventDefault();
                 const name = document.getElementById("removeName").value;
@@ -95,12 +127,15 @@
                     .then(data => {
                         alert(data.message);
                         updateUI();
-                        // Limpar campos do formulário
                         removeStudentForm.reset();
-                    });
+                    })
+                    .catch(err => alert("Erro: " + err.message));
             });
 
-            // Atualizar interface na inicialização
+            refreshButton.addEventListener("click", () => {
+                location.reload();
+            });
+
             updateUI();
         });
     </script>

@@ -1,37 +1,145 @@
+/* Estilo básico */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Roboto', Arial, sans-serif;
     margin: 20px;
+    background-color: #f9f9f9;
+    color: black;
 }
 
-form {
+h1, h2 {
+    color: black;
+}
+
+h1 {
     margin-bottom: 20px;
+    text-align: center
+}
+
+h2 {
+    margin-bottom: 15px;
+    text-align: center
+}
+
+/* Botão Atualizar Página */
+#refreshButton {
+    display: block;
+    margin: 0 auto 20px auto;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    
+}
+
+#refreshButton:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+}
+
+/* Layout Principal */
+.main-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: flex-start; /* Garante alinhamento superior dos contêineres */
+}
+
+.left-section, .mid-container, .right-container {
+    flex: 1; /* Permite que todos os contêineres tenham o mesmo tamanho proporcional */
+    display: flex;
+    max-width: 500px;
+    flex-direction: column;
+    gap: 10px;
+    background-color: #ffffff;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    height: 780px; /* Ajusta automaticamente ao conteúdo */
+}
+
+/* Ajustes para Mid e Right Containers */
+.mid-container {
+    max-width: 400px;
+}
+
+.right-container {
+    max-width: 400px;
+}
+
+/* Contêineres dos formulários */
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-container {
+    background-color: #ffffff;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 label {
-    margin-right: 10px;
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
 }
 
 input {
-    margin-right: 10px;
+    margin-bottom: 15px;
+    padding: 10px;
+    width: calc(100% - 22px);
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
 }
 
 button {
-    background-color: #007BFF;
+    background-color: #007bff;
     color: white;
     border: none;
-    padding: 5px 10px;
+    padding: 10px 15px;
+    font-size: 14px;
+    border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
 }
 
 button:hover {
     background-color: #0056b3;
+    transform: scale(1.05);
 }
 
+/* Listas */
 ul {
     list-style-type: none;
     padding: 0;
 }
 
 li {
-    margin: 5px 0;
+    background-color: #ffffff;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+    .main-container {
+        flex-direction: column;
+    }
+
+    .mid-container, .right-container {
+        max-width: none;
+    }
 }
