@@ -121,10 +121,18 @@ def remove_student():
             # Verificar se há alunos na fila de espera
             if fila_espera.size > 0:
                 next_in_line = fila_espera.pop()
-                turma.add(next_in_line)
-                aluno_info = informacoes_alunos.table[next_in_line["name"]]
-                aluno_info["turma"] = letra
-            return jsonify({"message": f"Aluno {name} removido com sucesso!", "students": turma.display(), "queue": fila_espera.display()}), 200
+                # Adicionar o aluno da fila à turma
+                if turma.add(next_in_line["name"]):
+                    # Atualizar as informações do aluno no hash table
+                    informacoes_alunos.add(
+                        next_in_line["name"],
+                        {"notas": [next_in_line["grade"]], "turma": letra}
+                    )
+            return jsonify({
+                "message": f"Aluno {name} removido com sucesso!",
+                "students": turma.display(),
+                "queue": fila_espera.display()
+            }), 200
     return jsonify({"message": "Aluno não encontrado!"}), 404
 
 @app.route("/data", methods=["GET"])
