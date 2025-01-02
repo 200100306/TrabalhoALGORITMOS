@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Alunos</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Gestão de Alunos</h1>
+    <form id="addStudentForm">
+        <label for="name">Nome do Aluno:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="turma">Turma:</label>
+        <input type="text" id="turma" name="turma" required>
+        <label for="grade">Nota:</label>
+        <input type="number" id="grade" name="grade" required>
+        <button type="submit">Adicionar</button>
+    </form>
+
+    <form id="removeStudentForm">
+        <label for="removeName">Nome do Aluno:</label>
+        <input type="text" id="removeName" name="removeName" required>
+        <button type="submit">Remover</button>
+    </form>
+
+    <h2>Alunos Matriculados:</h2>
+    <ul id="studentsList"></ul>
+
+    <h2>Fila de Espera:</h2>
+    <ul id="queueList"></ul>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const addStudentForm = document.getElementById("addStudentForm");
+            const removeStudentForm = document.getElementById("removeStudentForm");
+            const studentsList = document.getElementById("studentsList");
+            const queueList = document.getElementById("queueList");
+
+            // Atualizar interface
+            const updateUI = () => {
+                fetch("/data")
+                    .then(response => response.json())
+                    .then(data => {
+                        // Atualizar lista de alunos matriculados
+                        studentsList.innerHTML = "";
+                        data.students.forEach(student => {
+                            const li = document.createElement("li");
+                            li.textContent = `${student.name} - Turma: ${student.turma}, Nota: ${student.grade}`;
+                            studentsList.appendChild(li);
+                        });
+
+                        // Atualizar fila de espera
+                        queueList.innerHTML = "";
+                        data.queue.forEach(student => {
+                            const li = document.createElement("li");
+                            li.textContent = `${student.name} - Turma: ${student.turma}, Nota: ${student.grade}`;
+                            queueList.appendChild(li);
+                        });
+                    });
+            };
+
+            // Adicionar aluno
+            addStudentForm.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const name = document.getElementById("name").value;
+                const turma = document.getElementById("turma").value;
+                const grade = document.getElementById("grade").value;
+
+                fetch("/add_student", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, turma, grade }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(data.message);
+                        updateUI();
+                        // Limpar campos do formulário
+                        addStudentForm.reset();
+                    });
+            });
+
+            // Remover aluno
+            removeStudentForm.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const name = document.getElementById("removeName").value;
+
+                fetch("/remove_student", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(data.message);
+                        updateUI();
+                        // Limpar campos do formulário
+                        removeStudentForm.reset();
+                    });
+            });
+
+            // Atualizar interface na inicialização
+            updateUI();
+        });
+    </script>
+</body>
+</html>
