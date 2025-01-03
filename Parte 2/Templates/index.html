@@ -11,7 +11,11 @@
         <!-- Seção Esquerda -->
         <div class="left-section">
             <h1>Gestão de Alunos</h1>
-            <button id="refreshButton" style="margin-bottom: 20px;">Atualizar Página</button>
+            <div class="button-container">
+                <button id="refreshButton">Atualizar Página</button>
+                <button id="treeButton">Tree</button>
+                <button id="graphButton">Graph</button>
+            </div>
             
             <div class="container">
                 <div class="form-container">
@@ -58,6 +62,8 @@
             const studentsList = document.getElementById("studentsList");
             const queueList = document.getElementById("queueList");
             const refreshButton = document.getElementById("refreshButton");
+            const treeButton = document.getElementById("treeButton");
+            const graphButton = document.getElementById("graphButton");
 
             const updateUI = () => {
                 fetch("/data")
@@ -132,8 +138,17 @@
                     .catch(err => alert("Erro: " + err.message));
             });
 
+            // Dá refresh á página incial
             refreshButton.addEventListener("click", () => {
                 location.reload();
+            });
+            // Redireciona para a página "/tree"
+            treeButton.addEventListener("click", () => {
+                window.location.href = "/graph.html";
+            });
+            // Redireciona para a página "/tree"
+            graphButton.addEventListener("click", () => {
+                window.location.href = "/tree.html";
             });
 
             updateUI();

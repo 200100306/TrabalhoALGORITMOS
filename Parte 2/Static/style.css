@@ -20,10 +20,16 @@ h2 {
     text-align: center
 }
 
-/* Botão Atualizar Página */
-#refreshButton {
-    display: block;
-    margin: 0 auto 20px auto;
+/* Contêiner para alinhar os botões */
+.button-container {
+    display: flex;
+    justify-content: center; /* Alinha os botões ao centro */
+    gap: 10px; /* Espaçamento entre os botões */
+    margin-bottom: 20px;
+}
+
+/* Estilo para os botões */
+#refreshButton, #treeButton, #graphButton {
     padding: 10px 20px;
     background-color: #28a745;
     color: white;
@@ -32,10 +38,10 @@ h2 {
     cursor: pointer;
     font-size: 16px;
     font-weight: bold;
-    
+    transition: background-color 0.3s, transform 0.2s;
 }
 
-#refreshButton:hover {
+#refreshButton:hover, #treeButton:hover, #graphButton:hover {
     background-color: #218838;
     transform: scale(1.05);
 }

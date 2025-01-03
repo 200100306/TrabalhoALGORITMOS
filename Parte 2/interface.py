@@ -146,5 +146,6 @@ def get_data():
         "info": informacoes_alunos.display(),
     })
 
+
 if __name__ == "__main__":
     app.run(debug=True)

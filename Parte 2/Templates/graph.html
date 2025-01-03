@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grafo de Alunos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.24.0/cytoscape.min.js"></script>
+    <style>
+        #cy {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Grafo de Amizades</h1>
+    <div id="cy"></div>
+
+    <script>
+        // Carregar os dados do grafo
+        fetch("/graph_data")
+            .then(response => response.json())
+            .then(data => renderGraph(data))
+            .catch(err => console.error("Erro ao carregar dados do grafo:", err));
+
+        function renderGraph(data) {
+            const cy = cytoscape({
+                container: document.getElementById('cy'), // Container do grafo
+                elements: [
+                    // Adiciona os vértices
+                    ...data.vertices.map(v => ({ data: { id: v, label: v } })),
+                    // Adiciona as arestas
+                    ...data.arestas.map(([source, target]) => ({ data: { source, target } }))
+                ],
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'background-color': '#28a745',
+                            'label': 'data(label)',
+                            'color': '#fff',
+                            'text-valign': 'center',
+                            'text-halign': 'center',
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 3,
+                            'line-color': '#ccc',
+                            'target-arrow-color': '#ccc',
+                            'target-arrow-shape': 'triangle',
+                        }
+                    }
+                ],
+                layout: {
+                    name: 'cose', // Layout automático
+                }
+            });
+        }
+    </script>
+</body>
+</html>
